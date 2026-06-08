@@ -44,12 +44,13 @@ cp .env.example .env
 Open `.env` and fill in:
 ```
 PORT=5000
-LOG_API_URL=https://your-logging-api-url.com/logs
-ACCESS_TOKEN=your_bearer_token_here
+LOG_API_URL=http://4.224.186.213/evaluation-service/logs
+ACCESS_TOKEN=<PASTE_YOUR_VALID_ACCESS_TOKEN_HERE>
 ```
 
-> ⚠️ If you don't have a logging API yet, leave LOG_API_URL empty.
-> The app will still work — logs will print to console only.
+> ⚠️ **Security Warning**: Never hardcode the access token in source code.
+> Always use .env files. The token provided is a Bearer token for authentication.
+> The LOG_API_URL is the centralized logging endpoint for all backend logs.
 
 ### 3c. Start backend
 ```bash
@@ -83,11 +84,12 @@ cp .env.example .env
 Open `.env` and fill in:
 ```
 VITE_API_URL=http://localhost:5000
-VITE_LOG_API_URL=https://your-logging-api-url.com/logs
-VITE_ACCESS_TOKEN=your_bearer_token_here
+VITE_LOG_API_URL=http://4.224.186.213/evaluation-service/logs
+VITE_ACCESS_TOKEN=<PASTE_YOUR_VALID_ACCESS_TOKEN_HERE>
 ```
 
-> ⚠️ VITE_API_URL must point to your backend URL.
+> ⚠️ **Security Warning**: Never hardcode the access token in source code.
+> Always use .env files. VITE_API_URL must point to your backend URL.
 > If backend is running on port 5000 locally, use http://localhost:5000
 
 ### 4c. Start frontend
@@ -220,6 +222,40 @@ For logging-middleware, run `npm run build` before using it.
 ### Port already in use
 Change PORT in backend `.env` to another value like `5001`.
 Then update `VITE_API_URL` in frontend `.env` to match.
+
+---
+
+## Logging API Integration
+
+The application uses a centralized logging service for all backend and frontend logs.
+
+**Endpoint:** `POST http://4.224.186.213/evaluation-service/logs`
+
+**Required Headers:**
+```
+Authorization: Bearer ${ACCESS_TOKEN}
+Content-Type: application/json
+```
+
+**Request Body Format:**
+```json
+{
+  "stack": "backend" | "frontend",
+  "level": "debug" | "info" | "warn" | "error" | "fatal",
+  "package": "controller" | "service" | "route" | "api" | "component" | "page" | "etc.",
+  "message": "Your log message"
+}
+```
+
+**Expected Response:**
+```json
+{
+  "logID": "...",
+  "message": "log created successfully"
+}
+```
+
+Every API endpoint and frontend action must call the Log() function from the logging middleware.
 
 ---
 
